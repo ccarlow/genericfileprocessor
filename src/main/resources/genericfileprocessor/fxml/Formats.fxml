@@ -1,0 +1,22 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import dnddockfx.*?>
+<DockPane fx:id="formatsDockPane" title="Formats" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FormatsController">
+	<content>
+		<VBox>
+			<TreeView fx:id="treeView" VBox.vgrow="ALWAYS">
+				<root>
+					<TreeItem value="formats" expanded="true"/>
+				</root>
+				<contextMenu>
+					<ContextMenu fx:id="contextMenu">
+						<items>
+							<MenuItem text="Add Field"/>
+							<MenuItem text="Open" onAction="#openTreeItem"/>
+						</items>
+					</ContextMenu>
+				</contextMenu>
+			</TreeView>
+		</VBox>
+	</content>
+</DockPane>

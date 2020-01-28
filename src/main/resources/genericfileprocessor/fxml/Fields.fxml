@@ -1,0 +1,15 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import genericfileprocessor.ui.FieldTreeView?>
+
+<VBox fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FieldsController">
+	<FieldTreeView fx:id="treeView" VBox.vgrow="ALWAYS">
+		<contextMenu>
+			<ContextMenu fx:id="contextMenu">
+				<items>
+					<MenuItem text="Add Field" onAction="#addField"/>
+				</items>
+			</ContextMenu>
+		</contextMenu>
+	</FieldTreeView>
+</VBox>

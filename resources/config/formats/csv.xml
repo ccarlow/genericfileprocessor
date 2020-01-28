@@ -1,0 +1,25 @@
+<root>
+	<formats>
+		<entry>
+			<key>csv</key>
+			<value>
+				<type>text</type>
+				<fieldGroups>
+					<entry>
+						<key>default</key>
+						<value>
+							<delimiter>, </delimiter>
+							<fields>
+								<entry>
+									<key>value</key>
+									<value>
+									</value>
+								</entry>
+							</fields>
+						</value>
+					</entry>
+				</fieldGroups>
+			</value>
+		</entry>
+	</formats>
+</root>

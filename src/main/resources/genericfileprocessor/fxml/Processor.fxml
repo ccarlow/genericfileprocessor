@@ -1,0 +1,12 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import dnddockfx.*?>
+<DockPane fx:id="processorDockPane" title="Processor" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.ProcessorController"> 
+	<content>
+		<VBox>
+			<ComboBox fx:id="formats"/>
+			<TextField fx:id="input" text="/home/me/eclipse-workspace/GenericFileProcessor/src/test/resources/test.csv"/>
+			<Button onAction="#process"/>
+		</VBox>
+	</content>
+</DockPane>
