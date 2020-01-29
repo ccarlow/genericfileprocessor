@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import genericfileprocessor.SuperField.Next;
 
 public class Processor {
   
@@ -17,7 +16,6 @@ public class Processor {
       BufferedReader reader = new BufferedReader(new FileReader(input));
       StringBuilder value = new StringBuilder();
       StringBuilder delimiter = new StringBuilder();
-      int charCount = 0;
       
       List<FieldGroup> fieldGroups = new ArrayList<FieldGroup>();
       
@@ -27,31 +25,36 @@ public class Processor {
       groupField = fieldGroup.getFields().get(groupField.getName());
       fieldGroups.add(fieldGroup);
       while ((glyph = reader.read()) != -1) {
+        if (glyph == '\n') {
+          continue;
+        }
         delimiter.append((char)glyph);
         if (groupField.getDelimiter().indexOf(delimiter.toString()) >= 0) {
           if (groupField.getDelimiter().length() == delimiter.length()) {
             groupField.setDefaultValue(value.toString());
-            System.out.println(value.toString());
             value.setLength(0);
             delimiter.setLength(0);
-            if (groupField.getNextGroupField() == null) {
-              fieldGroup = new FieldGroup(groupField.getFieldGroup()); 
-              fieldGroups.add(fieldGroup);
-              groupField = fieldGroup.getFields().get(groupField.getName());
+            if (groupField.getNextGroupField() != null) {
+              GroupField nextField = groupField.getNextGroupField();
+              if (!nextField.getFieldGroup().getName().equals(groupField.getFieldGroup().getName())) {
+                fieldGroup = new FieldGroup(nextField.getFieldGroup()); 
+                fieldGroups.add(fieldGroup);
+              }
+              groupField = fieldGroup.getFields().get(nextField.getName());
+            } else {
+              break;
             }
           }
         } else {
           value.append(delimiter);
           delimiter.setLength(0);
         }
-        
-        charCount++;
       }
-      
+      groupField.setDefaultValue(value.toString());
       
       for (FieldGroup fieldGroup2 : fieldGroups) {
         for (GroupField groupField2 : fieldGroup2.getFields().values()) {
-          System.out.println(groupField2.getName() + " = " + groupField2.getDefaultValue());
+          System.out.println(fieldGroup2.getName() + "." + groupField2.getName() + " = " + groupField2.getDefaultValue());
         }
       }
     } catch (FileNotFoundException e) {

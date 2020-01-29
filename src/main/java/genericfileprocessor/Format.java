@@ -1,11 +1,11 @@
 package genericfileprocessor;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import genericfileprocessor.SuperField.Next;
 
 public class Format extends SuperField {
-  private Map<String, FieldGroup> fieldGroups = new HashMap<String, FieldGroup>();
+  private Map<String, FieldGroup> fieldGroups = new LinkedHashMap<String, FieldGroup>();
   private String type;
   private String name;
 
@@ -34,12 +34,14 @@ public class Format extends SuperField {
   }
   
   public GroupField getNextGroupField() {
-    Next next = getNext();
-    if (next != null) {
-      FieldGroup fieldGroup = getFieldGroups().get(next.getFieldGroup());
-      if (fieldGroup != null) {
-        return fieldGroup.getFields().get(next.getGroupField()); 
-      } 
+    List<Next> nexts = getNexts();
+    if (nexts != null) {
+      for (Next next : nexts) {
+        FieldGroup fieldGroup = getFieldGroups().get(next.getFieldGroup());
+        if (fieldGroup != null) {
+          return fieldGroup.getFields().get(next.getGroupField()); 
+        } 
+      }
     }
     return null;
   }

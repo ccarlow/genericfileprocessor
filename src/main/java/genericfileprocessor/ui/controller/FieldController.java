@@ -105,9 +105,9 @@ public class FieldController implements Initializable, FieldListener {
     delimiter.setText(field.getDelimiter());
     alignment.setValue(field.getAlignment().toString());
     lengthValue.setText(field.getLength().getValue().toString());
-    if (field.getNext() != null) {
-      nextFieldGroup.setValue(field.getNext().getFieldGroup());
-      nextField.setValue(field.getNext().getGroupField()); 
+    if (field.getNexts() != null) {
+//      nextFieldGroup.setValue(field.getNext().getFieldGroup());
+//      nextField.setValue(field.getNext().getGroupField()); 
     }
     defaultValue.setText(field.getDefaultValue());
     

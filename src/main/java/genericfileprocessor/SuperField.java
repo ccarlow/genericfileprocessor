@@ -1,5 +1,10 @@
 package genericfileprocessor;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+
 public class SuperField {
   private String name;
   private Length length;
@@ -7,7 +12,7 @@ public class SuperField {
   private String delimiter;
   private String defaultValue;
   private Alignment alignment;
-  private Next next;
+  private List<Next> nexts = new ArrayList<Next>();
   
   public static enum Alignment {
     left, right, center
@@ -24,10 +29,9 @@ public class SuperField {
     delimiter = superField.delimiter;
     defaultValue = superField.defaultValue;
     alignment = superField.alignment;
-    if (superField.next != null) {
-      next = new Next();
-      next.setFieldGroup(superField.next.getFieldGroup());
-      next.setGroupField(superField.next.getGroupField()); 
+    if (superField.nexts != null) {
+      nexts = new ArrayList<Next>();
+      nexts.addAll(superField.nexts);
     }
   }
 
@@ -79,16 +83,34 @@ public class SuperField {
     return defaultValue;
   }
 
-  public void setNext(Next next) {
-    this.next = next;
+  @XmlElementWrapper(name="nexts")
+  @XmlElement(name="next")
+  public void setNexts(List<Next> nexts) {
+    this.nexts = nexts;
   }
   
-  public Next getNext() {
-    return next;
+  public List<Next> getNexts() {
+    return nexts;
+  }
+  
+  public static class Condition {
+    enum Operation {
+      and, or, equals, less, greater
+    }
+    private Operation operation;
+    private String fieldGroup;
+    private String groupField;
+    private List<Condition> conditions;
+    
+    public boolean evaluate() {
+      return true;
+    }
   }
   
   public static class Next extends FieldRef {
-    
+    public Next() {
+      
+    }
   }
   
   public static class Length extends ValueOrFieldRef {

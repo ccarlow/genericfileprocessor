@@ -15,6 +15,60 @@
 									<value>
 									</value>
 								</entry>
+								<entry>
+									<key>value2</key>
+									<value>
+									</value>
+								</entry>
+								<entry>
+									<key>value3</key>
+									<value>
+									</value>
+								</entry>
+							</fields>
+						</value>
+					</entry>
+					
+					<entry>
+						<key>default2</key>
+						<value>
+							<delimiter>, </delimiter>
+							<fields>
+								<entry>
+									<key>value</key>
+									<value>
+									</value>
+								</entry>
+								<entry>
+									<key>value2</key>
+									<value>
+									</value>
+								</entry>
+							</fields>
+						</value>
+					</entry>
+					
+					<entry>
+						<key>default3</key>
+						<value>
+							<delimiter>, </delimiter>
+							<fields>
+								<entry>
+									<key>value</key>
+									<value>
+									</value>
+								</entry>
+								<entry>
+									<key>value2</key>
+									<value>
+										<nexts>
+											<next>
+												<fieldGroup>default</fieldGroup>
+												<groupField>value</groupField>
+											</next>
+										</nexts>
+									</value>
+								</entry>
 							</fields>
 						</value>
 					</entry>

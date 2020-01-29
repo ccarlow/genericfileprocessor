@@ -107,18 +107,15 @@ public class FormatReader {
                       groupField.setType(Type.text);
                     }
                   }
-
+                  
                   if (previous != null) {
-                    Next next = previous.getNext();
-                    if (next == null) {
-                      next = new Next();
+                    if (previous.getNexts() == null || previous.getNexts().isEmpty()) {
+                      List<Next> nexts = new ArrayList<Next>();
+                      Next next = new Next();
+                      nexts.add(next);
                       next.setFieldGroup(groupField.getFieldGroup().getName());
                       next.setGroupField(groupField.getName());
-                      previous.setNext(next);
-                    }
-
-                    if (format.getNext() == null) {
-                      format.setNext(next);
+                      previous.setNexts(nexts);
                     }
                   }
                   previous = groupField;
@@ -126,13 +123,15 @@ public class FormatReader {
               }
             }
 
-            if (format.getNext() == null) {
+            if (format.getNexts() == null || format.getNexts().isEmpty()) {
+              List<Next> nexts = new ArrayList<Next>();
               Next next = new Next();
+              nexts.add(next);
               FieldGroup fieldGroup = format.getFieldGroups().values().iterator().next();
               GroupField groupField = fieldGroup.getFields().values().iterator().next();
               next.setFieldGroup(fieldGroup.getName());
               next.setGroupField(groupField.getName());
-              format.setNext(next);
+              format.setNexts(nexts);
             }
           }
         }
