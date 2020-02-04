@@ -2,6 +2,7 @@ package genericfileprocessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
@@ -12,7 +13,7 @@ public class SuperField {
   private String delimiter;
   private String defaultValue;
   private Alignment alignment;
-  private List<Next> nexts = new ArrayList<Next>();
+  private List<NextField> nextFields = new ArrayList<NextField>();
   
   public static enum Alignment {
     left, right, center
@@ -29,9 +30,9 @@ public class SuperField {
     delimiter = superField.delimiter;
     defaultValue = superField.defaultValue;
     alignment = superField.alignment;
-    if (superField.nexts != null) {
-      nexts = new ArrayList<Next>();
-      nexts.addAll(superField.nexts);
+    if (superField.nextFields != null) {
+      nextFields = new ArrayList<NextField>();
+      nextFields.addAll(superField.nextFields);
     }
   }
 
@@ -83,33 +84,108 @@ public class SuperField {
     return defaultValue;
   }
 
-  @XmlElementWrapper(name="nexts")
-  @XmlElement(name="next")
-  public void setNexts(List<Next> nexts) {
-    this.nexts = nexts;
+  @XmlElementWrapper(name="nextFields")
+  @XmlElement(name="nextField")
+  public void setNextFields(List<NextField> nextFields) {
+    this.nextFields = nextFields;
   }
   
-  public List<Next> getNexts() {
-    return nexts;
+  public List<NextField> getNextFields() {
+    return nextFields;
   }
   
   public static class Condition {
-    enum Operation {
+    public enum Operator {
       and, or, equals, less, greater
     }
-    private Operation operation;
-    private String fieldGroup;
-    private String groupField;
+    private Operator operator;
+    private String field;
     private List<Condition> conditions;
+    private String value;
     
-    public boolean evaluate() {
-      return true;
+    public void setOperator(Operator operator) {
+      this.operator = operator;
+    }
+    
+    public Operator getOperator() {
+      return operator;
+    }
+    
+    public void setField(String field) {
+      this.field = field;
+    }
+    
+    public String getField() {
+      return field;
+    }
+    
+    @XmlElementWrapper(name="conditions")
+    @XmlElement(name="condition")
+    public void setConditions(List<Condition> conditions) {
+      this.conditions = conditions;
+    }
+    
+    public List<Condition> getConditions() {
+      return conditions;
+    }
+    
+    public void setValue(String value) {
+      this.value = value;
+    }
+    
+    public String getValue() {
+      return value;
+    }
+    
+    public boolean evaluate(Field field, Map<String, List<Field>> fieldMap) {
+      if (Operator.equals.equals(operator)) {
+        if (value != null) {
+          List<Field> fieldList = fieldMap.get(this.field);
+          if (fieldList != null) {
+            field = fieldList.get(fieldList.size() - 1); 
+          }
+          if (field != null) {
+            if (Field.Type.number.equals(field.getType())) {
+              try {
+                Double value = Double.parseDouble(field.getDefaultValue());
+              } catch (NumberFormatException e) {
+
+              }
+            } else if (Field.Type.text.equals(field.getType())) {
+              return value.equals(field.getDefaultValue());
+            }
+          }
+        }
+      } else if (Operator.or.equals(operator)) {
+        for (Condition condition : conditions) {
+          if (condition.evaluate(field, fieldMap)) {
+            return true;
+          }
+        }
+      } else if (Operator.and.equals(operator)) {
+        for (Condition condition : conditions) {
+          if (!condition.evaluate(field, fieldMap)) {
+            return false;
+          }
+        }
+        return true;
+      }
+      return false;
     }
   }
   
-  public static class Next extends FieldRef {
-    public Next() {
-      
+  public static class NextField extends FieldRef {
+    private Condition condition;
+    
+    public NextField() {
+    }
+    
+    public void setCondition(Condition condition) {
+      this.condition = condition;
+    }
+    
+    public Condition getCondition() {
+      return condition;
     }
   }
   
@@ -120,23 +196,14 @@ public class SuperField {
   }
 
   public static class FieldRef {
-    private String fieldGroup;
-    private String groupField;
+    private String field;
 
-    public String getFieldGroup() {
-      return fieldGroup;
+    public String getField() {
+      return field;
     }
 
-    public void setFieldGroup(String fieldGroup) {
-      this.fieldGroup = fieldGroup;
-    }
-
-    public String getGroupField() {
-      return groupField;
-    }
-
-    public void setGroupField(String groupField) {
-      this.groupField = groupField;
+    public void setField(String field) {
+      this.field = field;
     }
   }
 

@@ -1,57 +1,64 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import dnddockfx.*?>
 
-<VBox fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FieldController">
-	<GridPane>
-		<Label text="Field Group" GridPane.rowIndex="0" GridPane.valignment="TOP"/>
-		<VBox GridPane.rowIndex="0" GridPane.columnIndex="1">
-			<ComboBox fx:id="fieldGroup" >
+<DockPane fx:id="fieldDockPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FieldController">
+	<content>
+		<VBox>
+			<GridPane>
+			
+				<Label text="Name" GridPane.rowIndex="1" GridPane.valignment="TOP"/>
+				<VBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+					<TextField fx:id="name"/>
+				</VBox>
 				
-			</ComboBox>
-		</VBox>
-	
-		<Label text="Name" GridPane.rowIndex="1" GridPane.valignment="TOP"/>
-		<VBox GridPane.rowIndex="1" GridPane.columnIndex="1">
-			<TextField fx:id="name"/>
-		</VBox>
-		
-		<Label text="Type" GridPane.rowIndex="2" GridPane.valignment="TOP"/>
-		<VBox GridPane.rowIndex="2" GridPane.columnIndex="1">
-			<ComboBox fx:id="type" >
+				<Label text="Type" GridPane.rowIndex="2" GridPane.valignment="TOP"/>
+				<VBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+					<ComboBox fx:id="type" >
+						
+					</ComboBox>
+				</VBox>
 				
-			</ComboBox>
-		</VBox>
-		
-		<Label text="Length" GridPane.rowIndex="3" GridPane.valignment="TOP"/>
-		<VBox GridPane.rowIndex="3" GridPane.columnIndex="1">
-			<TextField fx:id="lengthValue"/>
-			<ComboBox fx:id="lengthFieldGroup"/>
-			<ComboBox fx:id="lengthField"/>
-		</VBox>
-		
-		<Label text="Delimiter" GridPane.rowIndex="4" GridPane.valignment="TOP"/>
-		<VBox GridPane.rowIndex="4" GridPane.columnIndex="1">
-			<TextField fx:id="delimiter"/>
-		</VBox>
-		
-		<Label text="Alignment" GridPane.rowIndex="5" GridPane.valignment="TOP"/>
-		<VBox GridPane.rowIndex="5" GridPane.columnIndex="1">
-			<ComboBox fx:id="alignment" >
+				<Label text="Length" GridPane.rowIndex="3" GridPane.valignment="TOP"/>
+				<VBox GridPane.rowIndex="3" GridPane.columnIndex="1">
+					<TextField fx:id="lengthValue"/>
+					<ComboBox fx:id="lengthField"/>
+				</VBox>
 				
-			</ComboBox>
+				<Label text="Delimiter" GridPane.rowIndex="4" GridPane.valignment="TOP"/>
+				<VBox GridPane.rowIndex="4" GridPane.columnIndex="1">
+					<TextField fx:id="delimiter"/>
+				</VBox>
+				
+				<Label text="Alignment" GridPane.rowIndex="5" GridPane.valignment="TOP"/>
+				<VBox GridPane.rowIndex="5" GridPane.columnIndex="1">
+					<ComboBox fx:id="alignment" >
+						
+					</ComboBox>
+				</VBox>
+			
+				<Label text="Next Fields" GridPane.rowIndex="6" GridPane.valignment="TOP"/>
+				<VBox fx:id="nextFieldContainer" GridPane.rowIndex="6" GridPane.columnIndex="1">
+					<TreeView fx:id="nextFields">
+						<root>
+							<TreeItem value="Next Fields" expanded="true"/>
+						</root>
+						<contextMenu>
+							<ContextMenu fx:id="contextMenu">
+								<items>
+									<MenuItem text="Open" onAction="#openNextItem"/>
+								</items>
+							</ContextMenu>
+						</contextMenu>
+					</TreeView>
+				</VBox>
+				
+				<Label text="Default Value" GridPane.rowIndex="7" GridPane.valignment="TOP"/>
+				<VBox GridPane.rowIndex="7" GridPane.columnIndex="1">
+					<TextField fx:id="defaultValue"/>
+				</VBox>
+				
+			</GridPane>
 		</VBox>
-	
-		<Label text="Next" GridPane.rowIndex="6" GridPane.valignment="TOP"/>
-		<VBox GridPane.rowIndex="6" GridPane.columnIndex="1">
-			<ComboBox fx:id="nextFieldGroup"/>
-			<ComboBox fx:id="nextField"/>
-		</VBox>
-		
-		<Label text="Default Value" GridPane.rowIndex="7" GridPane.valignment="TOP"/>
-		<VBox GridPane.rowIndex="7" GridPane.columnIndex="1">
-			<TextField fx:id="defaultValue"/>
-		</VBox>
-		
-	</GridPane>
-	
-</VBox>
+	</content>
+</DockPane>

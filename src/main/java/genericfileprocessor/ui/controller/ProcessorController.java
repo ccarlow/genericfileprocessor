@@ -30,7 +30,9 @@ public class ProcessorController implements Initializable {
   
   public void setFormatReader(FormatReader formatReader) {
     this.formatReader = formatReader;
-    formats.getItems().addAll(formatReader.getFormats().keySet());
+    for (Format format : formatReader.getFormats()) {
+      formats.getItems().add(format.getName());
+    }
   }
   
   public void setFormat(Format format) {

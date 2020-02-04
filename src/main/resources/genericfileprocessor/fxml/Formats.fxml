@@ -13,6 +13,7 @@
 						<items>
 							<MenuItem text="Add Field"/>
 							<MenuItem text="Open" onAction="#openTreeItem"/>
+							<MenuItem text="Load Processor" onAction="#loadProcessor"/>
 						</items>
 					</ContextMenu>
 				</contextMenu>

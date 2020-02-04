@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import dnddockfx.DockPane;
-import genericfileprocessor.GroupField;
-import genericfileprocessor.Processor;
-import genericfileprocessor.FieldGroup;
 import genericfileprocessor.Format;
+import genericfileprocessor.Field;
 import genericfileprocessor.listener.FormatsListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,13 +22,32 @@ public class FormatsController implements Initializable, FormatsListener {
   @FXML
   private DockPane formatsDockPane;
 
-  private String FIELD_GROUPS_TREE_ITEM = "Field Groups2";
-  private String FIELDS_TREE_ITEM = "Fields";
-  private String PROCESSOR_TREE_ITEM = "Processor";
-
   @Override
   public void initialize(URL location, ResourceBundle resources) {}
 
+  public void loadProcessor() {
+    TreeItem<String> treeItem = treeView.getSelectionModel().getSelectedItem();
+    if (treeItem != null) {
+      Object selectedItem = null;
+      if (treeItem.getGraphic() != null && treeItem.getGraphic().getUserData() != null) {
+        selectedItem = treeItem.getGraphic().getUserData();
+      }
+      if (selectedItem instanceof Format) {
+        try {
+          FXMLLoader fxmlLoader = new FXMLLoader(
+              getClass().getClassLoader().getResource("genericfileprocessor/fxml/Processor.fxml")); 
+          Parent root = fxmlLoader.load();
+          ((ProcessorController)fxmlLoader.getController()).setFormat((Format)selectedItem);
+          DockPane dockPane = new DockPane(treeItem.getValue(), root);
+          formatsDockPane.getDockPanes().add(dockPane);
+          dockPane.show();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+  
   public void openTreeItem() {
     TreeItem<String> treeItem = treeView.getSelectionModel().getSelectedItem();
     if (treeItem != null) {
@@ -40,36 +57,24 @@ public class FormatsController implements Initializable, FormatsListener {
         selectedItem = treeItem.getGraphic().getUserData();
       }
       if (selectedItem instanceof Format) {
-        if (treeItem.getValue().contentEquals(PROCESSOR_TREE_ITEM)) {
-          fxmlLoader = new FXMLLoader(
-              getClass().getClassLoader().getResource("genericfileprocessor/fxml/Processor.fxml"));
-        } else {
-          fxmlLoader = new FXMLLoader(
-              getClass().getClassLoader().getResource("genericfileprocessor/fxml/Format.fxml")); 
-        }
-      } else if (selectedItem instanceof FieldGroup) {
         fxmlLoader = new FXMLLoader(
-            getClass().getClassLoader().getResource("genericfileprocessor/fxml/FieldGroup.fxml"));
-      } else if (selectedItem instanceof GroupField) {
+            getClass().getClassLoader().getResource("genericfileprocessor/fxml/Format.fxml")); 
+      } else if (selectedItem instanceof Field) {
         fxmlLoader = new FXMLLoader(
             getClass().getClassLoader().getResource("genericfileprocessor/fxml/Field.fxml"));
       }
 
       if (fxmlLoader != null) {
         try {
-          Parent root = fxmlLoader.load();
-          DockPane dockPane = new DockPane(treeItem.getValue(), root);
+          DockPane dockPane = fxmlLoader.load();
           formatsDockPane.getDockPanes().add(dockPane);
           dockPane.show();
           if (selectedItem instanceof Format) {
-            if (treeItem.getValue().contentEquals(PROCESSOR_TREE_ITEM)) {
-              ProcessorController controller = fxmlLoader.getController();
-              controller.setFormat((Format)selectedItem); 
-            }
-          } else if (selectedItem instanceof FieldGroup) {
-          } else if (selectedItem instanceof GroupField) {
+            FormatController controller = fxmlLoader.getController();
+            controller.formatSelected((Format)selectedItem); 
+          } else if (selectedItem instanceof Field) {
             FieldController controller = fxmlLoader.getController();
-            controller.fieldSelected((GroupField) selectedItem);
+            controller.fieldSelected((Field) selectedItem);
           }
         } catch (IOException e) {
           e.printStackTrace();
@@ -87,101 +92,30 @@ public class FormatsController implements Initializable, FormatsListener {
     return null;
   }
 
-  public TreeItem<String> getFieldGroupsTreeItem(String format) {
-    TreeItem<String> treeItem = getFormatTreeItem(format);
-    if (treeItem != null) {
-      for (TreeItem<String> treeItem2 : treeItem.getChildren()) {
-        if (treeItem2.getValue().equals(FIELD_GROUPS_TREE_ITEM)) {
-          return treeItem2;
-        }
-      }
-    }
-    return null;
-  }
-
-  public TreeItem<String> getFieldGroupTreeItem(String format, String fieldGroup) {
-    TreeItem<String> treeItem = getFieldGroupsTreeItem(format);
-    if (treeItem != null) {
-      if (treeItem != null) {
-        for (TreeItem<String> treeItem2 : treeItem.getChildren()) {
-          if (treeItem2.getValue().equals(fieldGroup)) {
-            return treeItem2;
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  public TreeItem<String> getFieldsTreeItem(String format, String fieldGroup) {
-    TreeItem<String> treeItem = getFieldGroupTreeItem(format, fieldGroup);
-    if (treeItem != null) {
-      for (TreeItem<String> treeItem2 : treeItem.getChildren()) {
-        if (treeItem2.getValue().equals(FIELDS_TREE_ITEM)) {
-          return treeItem2;
-        }
-      }
-    }
-    return null;
-  }
-
-  public TreeItem<String> getFieldTreeItem(String format, String fieldGroup, String field) {
-    TreeItem<String> treeItem = getFieldsTreeItem(format, fieldGroup);
-    if (treeItem != null) {
-      for (TreeItem<String> treeItem2 : treeItem.getChildren()) {
-        if (treeItem2.getValue().equals(fieldGroup)) {
-          return treeItem2;
-        }
-      }
-    }
-    return null;
-  }
 
   @Override
-  public void formatAdded(String key, Format format) {
+  public void formatAdded(Format format) {
     Region region = new Region();
     region.setUserData(format);
-    TreeItem<String> treeItem = new TreeItem<String>(key, region);
-    treeItem.setExpanded(true);
-    treeView.getRoot().getChildren().add(treeItem);
-
-    TreeItem<String> treeItem2 = new TreeItem<String>(FIELD_GROUPS_TREE_ITEM);
-    treeItem2.setExpanded(true);
-    treeItem.getChildren().add(treeItem2);
+    TreeItem<String> formatTreeItem = new TreeItem<String>(format.getName(), region);
+    formatTreeItem.setExpanded(true);
+    treeView.getRoot().getChildren().add(formatTreeItem);
     
-    treeItem2 = new TreeItem<String>(PROCESSOR_TREE_ITEM, region);
-    treeItem2.setExpanded(true);
-    treeItem.getChildren().add(treeItem2);
-  }
-
-  @Override
-  public void fieldGroupAdded(String format, String key, FieldGroup fieldGroup) {
-    if (getFieldGroupTreeItem(format, key) == null) {
-      TreeItem<String> parentTreeItem = getFieldGroupsTreeItem(format);
-      if (parentTreeItem != null) {
-        Region region = new Region();
-        region.setUserData(fieldGroup);
-        TreeItem<String> treeItem = new TreeItem<String>(key, region);
-        treeItem.setExpanded(true);
-        parentTreeItem.getChildren().add(treeItem);
-
-        TreeItem<String> treeItem2 = new TreeItem<String>(FIELDS_TREE_ITEM);
-        treeItem2.setExpanded(true);
-        treeItem.getChildren().add(treeItem2);
-      }
+    for (Field field : format.getFields()) {
+      region = new Region();
+      region.setUserData(field);
+      TreeItem<String> fieldTreeItem = new TreeItem<String>(field.getName(), region);
+      formatTreeItem.getChildren().add(fieldTreeItem);
     }
   }
 
-  @Override
-  public void fieldAdded(String format, String fieldGroup, String key, GroupField field) {
-    if (getFieldTreeItem(format, fieldGroup, key) == null) {
-      TreeItem<String> parentTreeItem = getFieldsTreeItem(format, fieldGroup);
-      if (parentTreeItem != null) {
-        Region region = new Region();
-        region.setUserData(field);
-        TreeItem<String> treeItem = new TreeItem<String>(key, region);
-        parentTreeItem.getChildren().add(treeItem);
-      }
-    }
-  }
+//  @Override
+//  public void fieldAdded(String format, Field field) {
+//    TreeItem<String> formatTreeItem = getFormatTreeItem(format);
+//    
+//    Region region = new Region();
+//    region.setUserData(field);
+//    TreeItem<String> treeItem = new TreeItem<String>(field.getName(), region);
+//    formatTreeItem.getChildren().add(treeItem);
+//  }
 }

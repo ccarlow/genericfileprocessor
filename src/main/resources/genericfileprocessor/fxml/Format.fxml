@@ -1,7 +1,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<VBox fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FormatController">
-	<ComboBox fx:id="type">
-	</ComboBox>
-</VBox>
+<?import dnddockfx.*?>
+<DockPane fx:id="formatDockPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FormatController">
+	<content>
+		<VBox>
+			<ComboBox fx:id="type">
+			</ComboBox>
+		</VBox>
+	</content>
+</DockPane>

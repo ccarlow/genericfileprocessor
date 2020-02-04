@@ -1,29 +1,33 @@
 package genericfileprocessor.ui.controller;
 
+import java.io.IOException;
 import java.net.URL;
-import java.util.Map.Entry;
 import java.util.ResourceBundle;
-import genericfileprocessor.GroupField;
-import genericfileprocessor.SuperField;
-import genericfileprocessor.FieldGroup;
+import dnddockfx.DockManager;
+import dnddockfx.DockPane;
+import genericfileprocessor.Field;
 import genericfileprocessor.Format;
-import genericfileprocessor.listener.FieldListener;
-import genericfileprocessor.listener.FormatsListener;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import genericfileprocessor.SuperField.Condition;
+import genericfileprocessor.SuperField.NextField;
+import genericfileprocessor.listener.FieldSelectorListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 
-public class FieldController implements Initializable, FieldListener {
+public class FieldController implements Initializable, FieldSelectorListener {
+  @FXML
+  private DockPane fieldDockPane;
+  
   @FXML
   private TextField name;
   
@@ -38,15 +42,6 @@ public class FieldController implements Initializable, FieldListener {
 
   @FXML
   private ComboBox<String> type;
-  
-  @FXML
-  private ComboBox<String> fieldGroup;
-  
-  @FXML
-  private ComboBox<String> lengthFieldGroup;
-
-  @FXML
-  private ComboBox<String> nextFieldGroup;
 
   @FXML
   private ComboBox<String> lengthField;
@@ -59,57 +54,99 @@ public class FieldController implements Initializable, FieldListener {
 
   @FXML
   private TextField value;
+  
+  @FXML
+  private TreeView nextFields;
+  
+  @FXML
+  private VBox nextFieldContainer;
+  
+  private Field field;
 
+  public static final String CONDITIONS_TREE_ITEM = "Conditions";
+  
   @Override
   public void initialize(URL location, ResourceBundle resources) {
-    type.getItems().add(GroupField.Type.text.toString());
-    type.getItems().add(GroupField.Type.number.toString());
-
-    lengthFieldGroup.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-
-      }
-    });
+    for (Field.Type type : Field.Type.values()) {
+      this.type.getItems().add(type.toString());
+    }
   }
-
+  
   @Override
-  public void fieldSelected(GroupField field) {
-    ObservableList<String> fieldGroups = FXCollections
-        .observableArrayList(field.getFieldGroup().getFormat().getFieldGroups().keySet());
-    fieldGroup.getItems().addAll(fieldGroups);
-    lengthFieldGroup.getItems().addAll(fieldGroups);
-    nextFieldGroup.getItems().addAll(fieldGroups);
-
-    lengthFieldGroup.valueProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        lengthField.getItems().clear();
-        lengthField.getItems().addAll(field.getFieldGroup().getFormat().getFieldGroups().get(newValue).getFields().keySet());
-      }
-    });
-    
-    nextFieldGroup.valueProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        nextField.getItems().clear();
-        nextField.getItems().addAll(field.getFieldGroup().getFormat().getFieldGroups().get(newValue).getFields().keySet());
-      }
-    });
-    
-    fieldGroup.getSelectionModel().select(field.getFieldGroup().getName());
+  public void fieldSelected(Field field) {
+    this.field = field;
     name.setText(field.getName());
     type.setValue(field.getType().toString());
     delimiter.setText(field.getDelimiter());
     alignment.setValue(field.getAlignment().toString());
-    lengthValue.setText(field.getLength().getValue().toString());
-    if (field.getNexts() != null) {
-//      nextFieldGroup.setValue(field.getNext().getFieldGroup());
-//      nextField.setValue(field.getNext().getGroupField()); 
+    if (field.getLength() != null) {
+      lengthValue.setText(field.getLength().getValue().toString()); 
+    }
+    if (field.getNextFields() != null) { 
+      for (NextField nextField : field.getNextFields()) {
+        TreeItem treeItem = new TreeItem(nextField.getField());
+        treeItem.setExpanded(true);
+        nextFields.getRoot().getChildren().add(treeItem);
+        
+        TreeItem conditionsItem = new TreeItem(CONDITIONS_TREE_ITEM);
+        conditionsItem.setExpanded(true);
+        treeItem.getChildren().add(conditionsItem);
+        
+        if (nextField.getCondition() != null) {
+          setNextFieldCondition(nextField.getCondition(), conditionsItem);
+        }
+      }
     }
     defaultValue.setText(field.getDefaultValue());
-    
   }
+  
+  public void openNextItem() {
+    TreeItem treeItem = (TreeItem) nextFields.getSelectionModel().getSelectedItem();
+    if (treeItem.getGraphic() != null) {
+      Object userData = treeItem.getGraphic().getUserData();
+      if (userData instanceof Condition) {
+        Condition condition = (Condition)userData;
+        
+        FXMLLoader fxmlLoader = new FXMLLoader(
+            getClass().getClassLoader().getResource("genericfileprocessor/fxml/NextFieldCondition.fxml")); 
+        try {
+          Parent root = fxmlLoader.load();
+          ((NextFieldConditionController)fxmlLoader.getController()).fieldSelected(field);
+          DockPane dockPane = new DockPane((String)treeItem.getValue(), root);
+          fieldDockPane.getDockPanes().add(dockPane);
+          dockPane.show();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+  
+  public void setNextFieldCondition(Condition condition, TreeItem parentItem) {
+    String conditionValue = "";
+    if (condition.getField() != null) {
+      conditionValue += condition.getField();
+    }
+    
+    if (condition.getOperator() != null) {
+      conditionValue += condition.getOperator();
+    }
+    
+    if (condition.getValue() != null) {
+      conditionValue += condition.getValue();
+    }
+    
+    Region region = new Region();
+    region.setUserData(condition);
+    TreeItem treeItem = new TreeItem(conditionValue, region);
+    treeItem.setExpanded(true);
+    parentItem.getChildren().add(treeItem);
+    
+    if (condition.getConditions() != null) {
+      for (Condition childCondition : condition.getConditions()) {
+        setNextFieldCondition(childCondition, treeItem);
+      }
+    }
+  }
+  
 }

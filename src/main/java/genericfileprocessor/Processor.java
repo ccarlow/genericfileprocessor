@@ -5,7 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Processor {
   
@@ -17,30 +19,29 @@ public class Processor {
       StringBuilder value = new StringBuilder();
       StringBuilder delimiter = new StringBuilder();
       
-      List<FieldGroup> fieldGroups = new ArrayList<FieldGroup>();
+      Map<String, List<Field>> fieldMap = new HashMap<String, List<Field>>();
       
       int glyph = -1;
-      GroupField groupField = format.getNextGroupField();
-      FieldGroup fieldGroup = new FieldGroup(groupField.getFieldGroup());
-      groupField = fieldGroup.getFields().get(groupField.getName());
-      fieldGroups.add(fieldGroup);
+      Field field = new Field(format.getNextField());
+      addToFieldMap(fieldMap, field);
+//      field = format.getFields().get(field.getName());
+      Field firstField  = field;//new Field(field);
       while ((glyph = reader.read()) != -1) {
         if (glyph == '\n') {
           continue;
         }
         delimiter.append((char)glyph);
-        if (groupField.getDelimiter().indexOf(delimiter.toString()) >= 0) {
-          if (groupField.getDelimiter().length() == delimiter.length()) {
-            groupField.setDefaultValue(value.toString());
+        if (field.getDelimiter().indexOf(delimiter.toString()) >= 0) {
+          if (field.getDelimiter().length() == delimiter.length()) {
+            field.setDefaultValue(value.toString());
             value.setLength(0);
             delimiter.setLength(0);
-            if (groupField.getNextGroupField() != null) {
-              GroupField nextField = groupField.getNextGroupField();
-              if (!nextField.getFieldGroup().getName().equals(groupField.getFieldGroup().getName())) {
-                fieldGroup = new FieldGroup(nextField.getFieldGroup()); 
-                fieldGroups.add(fieldGroup);
-              }
-              groupField = fieldGroup.getFields().get(nextField.getName());
+            Field nextField = field.getNextField(fieldMap);
+            if (nextField != null) {
+              Field actualNextField = new Field(nextField);
+              field.setActualNextField(actualNextField);
+              field = actualNextField;
+              addToFieldMap(fieldMap, field);
             } else {
               break;
             }
@@ -50,18 +51,27 @@ public class Processor {
           delimiter.setLength(0);
         }
       }
-      groupField.setDefaultValue(value.toString());
+      field.setDefaultValue(value.toString());
       
-      for (FieldGroup fieldGroup2 : fieldGroups) {
-        for (GroupField groupField2 : fieldGroup2.getFields().values()) {
-          System.out.println(fieldGroup2.getName() + "." + groupField2.getName() + " = " + groupField2.getDefaultValue());
-        }
+      field = firstField;
+      while (field != null) {
+        System.out.println(field.getName() + " = " + field.getDefaultValue());
+        field = field.getActualNextField();
       }
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+  
+  public void addToFieldMap(Map<String, List<Field>> fieldMap, Field field) {
+    List<Field> fieldList = fieldMap.get(field.getName());
+    if (fieldList == null) {
+      fieldList = new ArrayList<Field>();
+      fieldMap.put(field.getName(), fieldList);
+    }
+    fieldList.add(field);
   }
   
 }

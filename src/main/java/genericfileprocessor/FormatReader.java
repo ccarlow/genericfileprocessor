@@ -15,6 +15,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.transform.OutputKeys;
@@ -27,22 +29,30 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import genericfileprocessor.Field.Type;
 import genericfileprocessor.SuperField.Alignment;
-import genericfileprocessor.SuperField.Next;
+import genericfileprocessor.SuperField.NextField;
 import genericfileprocessor.listener.FormatsListener;
 
-@XmlRootElement(name = "root")
+@XmlRootElement(name = "formats")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class FormatReader {
-  private Map<String, Format> formats = new HashMap<String, Format>();
+  @XmlElement(name="format")
+  private List<Format> formats = new ArrayList<Format>();
 
+//  @XmlTransient
+//  private Map<String, Format> formatMap = new HashMap<String, Format>();
+  
   @XmlTransient
   private List<FormatsListener> formatsListeners = new ArrayList<FormatsListener>();
 
-  public Map<String, Format> getFormats() {
+//  public Map<String, Format> getFormatMap() {
+//    return formatMap;
+//  }
+  
+  public List<Format> getFormats() {
     return formats;
   }
-
-  public void setFormats(Map<String, Format> formats) {
+  
+  public void setFormats(List<Format> formats) {
     this.formats = formats;
   }
 
@@ -59,87 +69,60 @@ public class FormatReader {
       File file = new File(configFile);
       JAXBContext jaxbContext = JAXBContext.newInstance(FormatReader.class);
       Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-      unmarshaller.setListener(new Unmarshaller.Listener() {
-        public void afterUnmarshal(Object target, Object parent) {
-          if (target instanceof Format) {
-            Format format = (Format) target;
-            GroupField firstGroupField = null;
-            String key = (String) ((Object[]) parent)[0];
-            for (FormatsListener formatsListener : formatsListeners) {
-              formatsListener.formatAdded(key, format);
-              GroupField previous = null;
-              for (Entry<String, FieldGroup> entry : format.getFieldGroups().entrySet()) {
-                FieldGroup fieldGroup = entry.getValue();
-                formatsListener.fieldGroupAdded(key, entry.getKey(), fieldGroup);
-                fieldGroup.setFormat(format);
-                fieldGroup.setName(entry.getKey());
-                for (Entry<String, GroupField> entry2 : fieldGroup.getFields().entrySet()) {
-                  GroupField groupField = entry2.getValue();
-                  formatsListener.fieldAdded(key, entry.getKey(), entry2.getKey(), groupField);
-                  groupField.setFieldGroup(fieldGroup);
-                  groupField.setName(entry2.getKey());
-
-                  if (groupField.getAlignment() == null) {
-                    if (fieldGroup.getAlignment() != null) {
-                      groupField.setAlignment(fieldGroup.getAlignment());
-                    } else {
-                      groupField.setAlignment(Alignment.left);
-                    }
-                  }
-
-                  if (groupField.getDelimiter() == null && fieldGroup.getDelimiter() != null) {
-                    groupField.setDelimiter(fieldGroup.getDelimiter());
-                  }
-
-                  if (groupField.getDefaultValue() == null
-                      && fieldGroup.getDefaultValue() != null) {
-                    groupField.setDefaultValue(fieldGroup.getDefaultValue());
-                  }
-
-                  if (groupField.getLength() == null && fieldGroup.getLength() != null) {
-                    groupField.setLength(fieldGroup.getLength());
-                  }
-
-                  if (groupField.getType() == null) {
-                    if (fieldGroup.getType() != null) {
-                      groupField.setType(fieldGroup.getType());
-                    } else {
-                      groupField.setType(Type.text);
-                    }
-                  }
-                  
-                  if (previous != null) {
-                    if (previous.getNexts() == null || previous.getNexts().isEmpty()) {
-                      List<Next> nexts = new ArrayList<Next>();
-                      Next next = new Next();
-                      nexts.add(next);
-                      next.setFieldGroup(groupField.getFieldGroup().getName());
-                      next.setGroupField(groupField.getName());
-                      previous.setNexts(nexts);
-                    }
-                  }
-                  previous = groupField;
-                }
-              }
-            }
-
-            if (format.getNexts() == null || format.getNexts().isEmpty()) {
-              List<Next> nexts = new ArrayList<Next>();
-              Next next = new Next();
-              nexts.add(next);
-              FieldGroup fieldGroup = format.getFieldGroups().values().iterator().next();
-              GroupField groupField = fieldGroup.getFields().values().iterator().next();
-              next.setFieldGroup(fieldGroup.getName());
-              next.setGroupField(groupField.getName());
-              format.setNexts(nexts);
-            }
-          }
-        }
-      });
       FormatReader formatReader = (FormatReader) unmarshaller.unmarshal(file);
-      formats.putAll(formatReader.getFormats());
+      if (formatReader.getFormats() != null) {
+        for (Format format : formatReader.getFormats()) {
+          setFormatDefaults(format);
+          formats.add(format);
+          for (FormatsListener formatsListener : formatsListeners) {
+            formatsListener.formatAdded(format);
+          } 
+        }
+      }
     } catch (JAXBException e) {
       e.printStackTrace();
+    }
+  }
+  
+  public void setFormatDefaults(Format format) {
+    Field previous = null;
+    for (Field field : format.getFields()) {
+      field.setFormat(format);
+
+      if (field.getAlignment() == null) {
+        if (format.getAlignment() != null) {
+          field.setAlignment(format.getAlignment());
+        } else {
+          field.setAlignment(Alignment.left);
+        }
+      }
+
+      if (field.getDelimiter() == null && format.getDelimiter() != null) {
+        field.setDelimiter(format.getDelimiter());
+      }
+
+      if (field.getDefaultValue() == null && format.getDefaultValue() != null) {
+        field.setDefaultValue(format.getDefaultValue());
+      }
+
+      if (field.getLength() == null && format.getLength() != null) {
+        field.setLength(format.getLength());
+      }
+
+      if (field.getType() == null) {
+        field.setType(Type.text);
+      }
+
+      if (previous != null) {
+        if (previous.getNextFields() == null || previous.getNextFields().isEmpty()) {
+          List<NextField> nexts = new ArrayList<NextField>();
+          NextField next = new NextField();
+          nexts.add(next);
+          next.setField(field.getName());
+          previous.setNextFields(nexts);
+        }
+      }
+      previous = field;
     }
   }
 
