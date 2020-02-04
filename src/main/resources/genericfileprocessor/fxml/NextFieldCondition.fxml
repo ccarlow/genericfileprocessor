@@ -1,0 +1,11 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.NextFieldConditionController">
+	<GridPane>
+		<Label text="Field" GridPane.rowIndex="1" GridPane.valignment="TOP"/>
+		<VBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+			<TextField fx:id="field"/>
+		</VBox>
+	</GridPane>
+</VBox>
