@@ -30,7 +30,7 @@ import javax.xml.transform.stream.StreamResult;
 import genericfileprocessor.Field.Type;
 import genericfileprocessor.SuperField.Alignment;
 import genericfileprocessor.SuperField.NextField;
-import genericfileprocessor.listener.FormatsListener;
+import genericfileprocessor.listener.FormatListener;
 
 @XmlRootElement(name = "formats")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -42,7 +42,7 @@ public class FormatReader {
 //  private Map<String, Format> formatMap = new HashMap<String, Format>();
   
   @XmlTransient
-  private List<FormatsListener> formatsListeners = new ArrayList<FormatsListener>();
+  private List<FormatListener> formatsListeners = new ArrayList<FormatListener>();
 
 //  public Map<String, Format> getFormatMap() {
 //    return formatMap;
@@ -56,11 +56,11 @@ public class FormatReader {
     this.formats = formats;
   }
 
-  public void addFormatsListener(FormatsListener formatsListener) {
+  public void addFormatsListener(FormatListener formatsListener) {
     formatsListeners.add(formatsListener);
   }
 
-  public void removeFormatsListener(FormatsListener formatsListener) {
+  public void removeFormatsListener(FormatListener formatsListener) {
     formatsListeners.remove(formatsListener);
   }
 
@@ -74,7 +74,7 @@ public class FormatReader {
         for (Format format : formatReader.getFormats()) {
           setFormatDefaults(format);
           formats.add(format);
-          for (FormatsListener formatsListener : formatsListeners) {
+          for (FormatListener formatsListener : formatsListeners) {
             formatsListener.formatAdded(format);
           } 
         }
@@ -113,15 +113,15 @@ public class FormatReader {
         field.setType(Type.text);
       }
 
-      if (previous != null) {
-        if (previous.getNextFields() == null || previous.getNextFields().isEmpty()) {
-          List<NextField> nexts = new ArrayList<NextField>();
-          NextField next = new NextField();
-          nexts.add(next);
-          next.setField(field.getName());
-          previous.setNextFields(nexts);
-        }
-      }
+//      if (previous != null) {
+//        if (previous.getNextFields() == null || previous.getNextFields().isEmpty()) {
+//          List<NextField> nexts = new ArrayList<NextField>();
+//          NextField next = new NextField();
+//          nexts.add(next);
+//          next.setField(field.getName());
+//          previous.setNextFields(nexts);
+//        }
+//      }
       previous = field;
     }
   }

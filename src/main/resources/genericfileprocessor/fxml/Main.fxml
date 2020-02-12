@@ -1,7 +1,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import dnddockfx.*?>
-<DockPane fx:id="fileProcessorDockPane" title="File Processor" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.MainController">
+<DockPane fx:id="fileProcessorDockPane" title="Format Processor" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.MainController">
 	<dockPanes>
 		<fx:include fx:id="formats" source="Formats.fxml"/>
 	</dockPanes>

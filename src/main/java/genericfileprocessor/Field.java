@@ -1,12 +1,10 @@
 package genericfileprocessor;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Field extends SuperField {
   private Type type;
-  private String name;
   private Format format;
   
   private Field nextField;
@@ -25,14 +23,6 @@ public class Field extends SuperField {
     type = field.type;
     format = field.getFormat();
   }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
   
   public Type getType() {
     return type;
@@ -45,7 +35,7 @@ public class Field extends SuperField {
   public Format getFormat() {
     return format;
   }
-
+  
   public void setFormat(Format format) {
     this.format = format;
   }
@@ -56,10 +46,10 @@ public class Field extends SuperField {
       for (NextField next : nexts) {
         if (next.getCondition() != null) {
           if (next.getCondition().evaluate(this, fieldMap)) {
-            return format.getFieldMap().get(next.getField()); 
+            return format.getFieldMap().get(next.getFieldRef()); 
           } 
         } else {
-          return format.getFieldMap().get(next.getField());
+          return format.getFieldMap().get(next.getFieldRef());
         }
       }
     }

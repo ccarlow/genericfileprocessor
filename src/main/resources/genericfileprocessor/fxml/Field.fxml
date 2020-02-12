@@ -2,9 +2,16 @@
 <?import javafx.scene.layout.*?>
 <?import dnddockfx.*?>
 
-<DockPane fx:id="fieldDockPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FieldController">
+<DockPane fx:id="fieldDockPane" title="Field Editor" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FieldController">
 	<content>
 		<VBox>
+			<Button onAction="#applyChanges" text="Apply"/>
+			<Button onAction="#saveAsNew" text="Save As New"/>
+			<Label text="Position After"/>
+			<HBox>
+				<ComboBox fx:id="indexField"/>
+				<Button onAction="#setAsFirstField" text="Set as first field"/>
+			</HBox>
 			<GridPane>
 			
 				<Label text="Name" GridPane.rowIndex="1" GridPane.valignment="TOP"/>

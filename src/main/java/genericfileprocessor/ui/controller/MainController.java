@@ -17,7 +17,7 @@ public class MainController implements Initializable {
 
     formatReader.addFormatsListener(formatsController);
 
-//    formatReader.addFormatsFromConfig("resources/config/formats/moods.xml");
+    formatReader.addFormatsFromConfig("resources/config/formats/moods.xml");
     formatReader.addFormatsFromConfig("resources/config/formats/csv.xml");
   }
 

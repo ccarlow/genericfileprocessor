@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import genericfileprocessor.listener.FieldRefListener;
+import genericfileprocessor.listener.NextFieldListener;
 
 public class SuperField {
   private String name;
@@ -14,6 +16,7 @@ public class SuperField {
   private String defaultValue;
   private Alignment alignment;
   private List<NextField> nextFields = new ArrayList<NextField>();
+  private List<NextFieldListener> nextFieldListeners = new ArrayList<NextFieldListener>();
   
   public static enum Alignment {
     left, right, center
@@ -83,15 +86,41 @@ public class SuperField {
   public String getDefaultValue() {
     return defaultValue;
   }
+  
+  public String toString() {
+    return name;
+  }
 
   @XmlElementWrapper(name="nextFields")
   @XmlElement(name="nextField")
-  public void setNextFields(List<NextField> nextFields) {
+  protected void setNextFields(List<NextField> nextFields) {
     this.nextFields = nextFields;
   }
   
-  public List<NextField> getNextFields() {
+  protected List<NextField> getNextFields() {
     return nextFields;
+  }
+  
+  public List<NextField> getNextFieldsCopy() {
+    return new ArrayList<NextField>(nextFields);
+  }
+  
+  public void addNextFieldListener(NextFieldListener nextFieldListener) {
+    if (!nextFieldListeners.contains(nextFieldListener)) {
+      nextFieldListeners.add(nextFieldListener); 
+    }
+  }
+  
+  public void removeNextFieldListener(NextFieldListener nextFieldListener) {
+    nextFieldListeners.remove(nextFieldListener);
+  }
+  
+  public void addNextField(NextField nextField) {
+    this.nextFields.add(nextField);
+    nextField.setField(this);
+    for (NextFieldListener nextFieldListener : nextFieldListeners) {
+      nextFieldListener.nextFieldAdded(nextField);
+    }
   }
   
   public static class Condition {
@@ -102,6 +131,7 @@ public class SuperField {
     private String field;
     private List<Condition> conditions;
     private String value;
+    private Condition parentCondition;
     
     public void setOperator(Operator operator) {
       this.operator = operator;
@@ -119,14 +149,33 @@ public class SuperField {
       return field;
     }
     
-    @XmlElementWrapper(name="conditions")
-    @XmlElement(name="condition")
-    public void setConditions(List<Condition> conditions) {
-      this.conditions = conditions;
+    public Condition getParentCondition() {
+      return parentCondition;
     }
     
-    public List<Condition> getConditions() {
-      return conditions;
+    @XmlElementWrapper(name="conditions")
+    @XmlElement(name="condition")
+    protected void setConditions(List<Condition> conditions) {
+      this.conditions = conditions;
+      for (Condition condition : conditions) {
+        condition.parentCondition = this;
+      }
+    }
+    
+    public boolean addChildCondition(Condition condition) {
+      if (!conditions.contains(condition)) {
+        conditions.add(condition);
+        return true;
+      }
+      return false;
+    }
+    
+    public List<Condition> getConditionsCopy() {
+      return conditions == null ? null : new ArrayList<Condition>(conditions);
+    }
+    
+    public boolean removeChildCondition(Condition condition) {
+      return conditions.remove(condition);
     }
     
     public void setValue(String value) {
@@ -174,14 +223,75 @@ public class SuperField {
     }
   }
   
+  public static class NextFieldCondition extends Condition {
+    private NextField nextField;
+    
+    public void setNextField(NextField nextField) {
+      this.nextField = nextField;
+    }
+    
+    public NextField getNextField() {
+      return nextField;
+    }
+
+    @Override
+    public void setOperator(Operator operator) {
+      super.setOperator(operator);
+      nextField.notifyNextFieldConditionAdded(this);
+    }
+    
+    @Override
+    public boolean addChildCondition(Condition condition) {
+      boolean notify = super.addChildCondition(condition);
+      if (notify) {
+        nextField.notifyNextFieldConditionAdded(this);
+      }
+      return notify;
+    }
+    
+    @Override
+    public boolean removeChildCondition(Condition condition) {
+      boolean notify = super.removeChildCondition(condition);
+      if (notify) {
+        nextField.notifyNextFieldConditionRemoved(this);
+      }
+      return notify;
+    }
+  }
+  
   public static class NextField extends FieldRef {
-    private Condition condition;
+    private NextFieldCondition condition;
+    private List<NextFieldListener> nextFieldListeners = new ArrayList<NextFieldListener>();
     
     public NextField() {
     }
     
-    public void setCondition(Condition condition) {
+    public void addNextFieldListener(NextFieldListener nextFieldListener) {
+      if (!nextFieldListeners.contains(nextFieldListener)) {
+        nextFieldListeners.add(nextFieldListener); 
+      }
+    }
+    
+    public void removeNextFieldListener(NextFieldListener nextFieldListener) {
+      nextFieldListeners.remove(nextFieldListener);
+    }
+    
+    public void setCondition(NextFieldCondition condition) {
       this.condition = condition;
+      condition.setNextField(this);
+      notifyNextFieldConditionAdded(condition);
+    }
+    
+    public void notifyNextFieldConditionAdded(NextFieldCondition condition) {
+      for (NextFieldListener nextFieldListener : nextFieldListeners) {
+        nextFieldListener.nextFieldConditionAdded(condition);
+      }
+    }
+    
+    public void notifyNextFieldConditionRemoved(NextFieldCondition condition) {
+      for (NextFieldListener nextFieldListener : nextFieldListeners) {
+        nextFieldListener.nextFieldConditionRemoved(condition);
+      }
     }
     
     public Condition getCondition() {
@@ -196,14 +306,37 @@ public class SuperField {
   }
 
   public static class FieldRef {
-    private String field;
+    private String fieldRef;
+    private SuperField field;
+    private List<FieldRefListener> fieldRefListeners = new ArrayList<FieldRefListener>();
 
-    public String getField() {
-      return field;
+    public String getFieldRef() {
+      return fieldRef;
     }
 
-    public void setField(String field) {
+    public void setFieldRef(String fieldRef) {
+      this.fieldRef = fieldRef;
+      for (FieldRefListener fieldRefListener : fieldRefListeners) {
+        fieldRefListener.fieldRefChanged(this);
+      }
+    }
+    
+    public void addFieldRefListener(FieldRefListener fieldRefListener) {
+      if (!fieldRefListeners.contains(fieldRefListener)) {
+        fieldRefListeners.add(fieldRefListener); 
+      }
+    }
+    
+    public void removeFieldRefListener(FieldRefListener fieldRefListener) {
+      fieldRefListeners.remove(fieldRefListener);
+    }
+    
+    public void setField(SuperField field) {
       this.field = field;
+    }
+    
+    public SuperField getField() {
+      return field;
     }
   }
 

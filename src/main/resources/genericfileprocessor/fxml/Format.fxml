@@ -1,11 +1,25 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import dnddockfx.*?>
-<DockPane fx:id="formatDockPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FormatController">
+<DockPane fx:id="formatDockPane" title="Format Editor" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.FormatController">
 	<content>
 		<VBox>
-			<ComboBox fx:id="type">
-			</ComboBox>
+			<GridPane>
+				<Label text="Name"/>
+				<TextField fx:id="name" GridPane.columnIndex="1"/>
+			
+				<Label text="Type" GridPane.rowIndex="1"/>
+				<ComboBox fx:id="type" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+				
+				<Label text="Delimiter" GridPane.rowIndex="2"/>
+				<TextField fx:id="delimiter" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+				
+				<Label text="Length" GridPane.rowIndex="3"/>
+				<VBox GridPane.columnIndex="1" GridPane.rowIndex="3">
+					<TextField fx:id="lengthValue"/>
+					<ComboBox fx:id="lengthField"/>
+				</VBox>
+			</GridPane>
 		</VBox>
 	</content>
 </DockPane>

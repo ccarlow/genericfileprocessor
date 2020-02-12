@@ -2,10 +2,20 @@
 <?import javafx.scene.layout.*?>
 
 <VBox fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.NextFieldConditionController">
+	<Button onAction="#applyChanges" text="Apply"/>
 	<GridPane>
-		<Label text="Field" GridPane.rowIndex="1" GridPane.valignment="TOP"/>
+		<Label text="Operator" GridPane.rowIndex="1" GridPane.valignment="TOP"/>
 		<VBox GridPane.rowIndex="1" GridPane.columnIndex="1">
-			<TextField fx:id="field"/>
+			<ComboBox fx:id="operator"/>
+		</VBox>
+		
+		<Label text="Parent Condition" GridPane.rowIndex="2" GridPane.valignment="TOP"/>
+		<VBox GridPane.rowIndex="2" GridPane.columnIndex="1">
+			<TreeView fx:id="parentCondition">
+				<root>
+					<TreeItem value="Condition" expanded="true"/>
+				</root>
+			</TreeView>
 		</VBox>
 	</GridPane>
 </VBox>

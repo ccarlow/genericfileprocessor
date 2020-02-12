@@ -1,0 +1,13 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="genericfileprocessor.ui.controller.NextFieldController">
+	<Button onAction="#applyChanges" text="Apply"/>
+	<Button onAction="#saveAsNew" text="Save As New"/>
+	<GridPane>
+		<Label text="Next Field" GridPane.rowIndex="1" GridPane.valignment="TOP"/>
+		<VBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+			<ComboBox fx:id="fieldRef"/>
+		</VBox>
+	</GridPane>
+</VBox>

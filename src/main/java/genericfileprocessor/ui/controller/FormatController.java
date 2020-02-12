@@ -8,10 +8,23 @@ import genericfileprocessor.listener.FormatSelectorListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 
 public class FormatController implements Initializable, FormatSelectorListener {
   @FXML
   private ComboBox<Format.Type2> type;
+  
+  @FXML
+  private ComboBox<String> lengthField;
+  
+  @FXML
+  private TextField name;
+  
+  @FXML
+  private TextField delimiter;
+  
+  @FXML
+  private TextField lengthValue;
   
   @FXML
   private DockPane formatDockPane;
@@ -28,5 +41,7 @@ public class FormatController implements Initializable, FormatSelectorListener {
     if (format.getType() != null) {
       this.type.getSelectionModel().select(format.getType()); 
     }
+    name.setText(format.getName());
+    delimiter.setText(format.getDelimiter());
   }
 }

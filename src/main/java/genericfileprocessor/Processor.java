@@ -21,8 +21,10 @@ public class Processor {
       
       Map<String, List<Field>> fieldMap = new HashMap<String, List<Field>>();
       
+      
+      Field field = new Field(format.getFields().get(0));
       int glyph = -1;
-      Field field = new Field(format.getNextField());
+//      Field field = new Field(format.getNextField());
       addToFieldMap(fieldMap, field);
 //      field = format.getFields().get(field.getName());
       Field firstField  = field;//new Field(field);
